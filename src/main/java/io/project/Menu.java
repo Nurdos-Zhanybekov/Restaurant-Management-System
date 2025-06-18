@@ -11,7 +11,9 @@ public class Menu {
         MenuItem ramen = new MenuItem("Ramen", 8, "meal");
 
         Map<String, MenuItem> menuItemMap = new HashMap<>();
+        List<MenuItem> menuItems = new ArrayList<>();
         Queue<Order> orders = new ConcurrentLinkedQueue<>();
+        Queue<Order> completedOrders = new ConcurrentLinkedQueue<>();
         menuItemMap.put("Burger", burger);
         menuItemMap.put("Pizza", pizza);
         menuItemMap.put("Ramen", ramen);
@@ -22,6 +24,7 @@ public class Menu {
         System.out.println();
 
         boolean isFinished = false;
+        int id = 1;
 
         while(!isFinished){
             System.out.println("1. Show menu");
@@ -35,7 +38,6 @@ public class Menu {
             int chooseOption = scanner.nextInt();
             scanner.nextLine();
 
-            int id = 1;
             switch (chooseOption){
                 case 1:
                     int number = 1;
@@ -64,6 +66,7 @@ public class Menu {
                     String enterCustomerName = scanner.nextLine();
                     System.out.print("Takeaway? (true/false): ");
                     boolean enterTakeaway = scanner.nextBoolean();
+                    scanner.nextLine();
                     System.out.println("Select Menu Items (type 'done' to finish): ");
                     String enterMenuItem = scanner.nextLine();
 
@@ -76,31 +79,55 @@ public class Menu {
                         enterMenuItem = scanner.nextLine();
                         for(Map.Entry<String, MenuItem> menuItemEntry : menuItemMap.entrySet()){
                             if(enterMenuItem.equals(menuItemEntry.getKey())){
-                                order.setItems(Collections.singletonList(menuItemEntry.getValue()));
+                                menuItems.add(menuItemEntry.getValue());
+                                order.setItems(menuItems);
                                 break;
                             }
                         }
                     }
+
                     LocalDateTime localDateTime = LocalDateTime.now();
                     order.setOrderTime(localDateTime);
                     orders.add(order);
 
-                    System.out.println("Order placed. Order ID: ");
+                    System.out.println("Order placed. Order ID: " + id);
+                    id++;
                     break;
                 case 4:
-                    System.out.print("Processing Order ID: ");
-                    System.out.println("Customer: ");
-                    System.out.println("Items: ");
-                    System.out.println("Total: $");
+                    double totalPrice = 0;
+                    Order processingOrder = orders.poll();
+                    assert processingOrder != null;
+                    System.out.println("Processing Order ID: " + processingOrder.getOrderID());
+                    System.out.println("Customer: " + processingOrder.getCustomerName());
+                    System.out.print("Items: ");
+                    for(MenuItem menuItem1 : processingOrder.getItems()){
+                        System.out.print(menuItem1.getName() + ", ");
+                        totalPrice += menuItem1.getPrice();
+                    }
+                    processingOrder.setTotalPrice(totalPrice);
+                    System.out.println("Total: $" + totalPrice);
                     System.out.println("Order Completed");
+                    completedOrders.add(processingOrder);
                     break;
                 case 5:
                     System.out.println("Completed Orders:");
+                    for(Order completedOrder : completedOrders) {
+                        System.out.println("Order ID: " + completedOrder.getOrderID() + " | "
+                                + "Customer: " + completedOrder.getCustomerName() + " | " + "Total: "
+                                + completedOrder.getTotalPrice());
+                    }
+                    break;
                 case 6:
+                    int totalOrders = 0;
+                    double totalSales = 0;
                     System.out.println("---Daily Report---");
-                    System.out.println("Total Orders: ");
-                    System.out.println("Total Sales: ");
-                    System.out.println("Most Popular Item: ");
+                    for(Order order1 : completedOrders){
+                        totalOrders++;
+                        totalSales += order1.getTotalPrice();
+                    }
+                    System.out.println("Total Orders: " + totalOrders);
+                    System.out.println("Total Sales: $" + totalSales);
+                    break;
                 case 7:
                     isFinished = true;
                     break;

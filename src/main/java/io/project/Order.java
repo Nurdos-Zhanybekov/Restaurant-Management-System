@@ -9,6 +9,7 @@ public class Order {
     private String customerName;
     private boolean isTakeaway;
     private LocalDateTime orderTime;
+    private double totalPrice;
 
     public int getOrderID() {
         return orderID;
@@ -48,5 +49,13 @@ public class Order {
 
     public void setOrderTime(LocalDateTime orderTime) {
         this.orderTime = orderTime;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }
